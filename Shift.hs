@@ -88,12 +88,8 @@ onbear :: Shift Flight
 onbear ls = map onbear' (bothly 1 1 ls)
 
 onbear' :: (Flight, Loud, Flight) -> Loud
-onbear' ([l], m, [r]) = applyWhen (not (any (worth' Bear) [l, r]))
-  (lif (isThroat m)
-    onbearThroat
-    (applyWhen (worth' Smooth m) (on Bear)))
-  m
-onbear' (_, m, _) = m
+onbear' (l, m, r) = applyWhen (not (any (any (worth' Bear)) [l, r]))
+  (lif (isThroat m) onbearThroat (applyWhen (worth' Smooth m) (on Bear))) m
 
 gainbear :: Shift Bright
 gainbear = makeBright.onbear.flatten

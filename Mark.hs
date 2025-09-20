@@ -14,6 +14,7 @@ class (Show a, Eq a) => Mark a where
   axled :: a -> Bool
   below :: a -> a -> Bool
   above :: a -> a -> Bool
+  above = flip below
   isSteadfast :: a -> Bool
 
 data Branch a = Branch {
@@ -23,16 +24,15 @@ data Branch a = Branch {
 } deriving (Eq)
 
 instance Mark a => Show (Branch a) where
-  show :: Branch a -> String
-  show l = init (show' 0 l)
+  show l = init (showMark 0 l)
 
 showWorth :: Mark a => a -> Bool -> String
 showWorth m b = lif b "+" (lif (axled m) "-" "0")
 
-show' :: Mark a => Int -> Branch a -> String
-show' n (Branch m w cs)
+showMark :: Mark a => Int -> Branch a -> String
+showMark n (Branch m w cs)
   = concat (replicate n " ") ++ "[" ++ showWorth m w ++ show m ++ "]"
- ++ "\n" ++ (\x -> lif (not $ null x) x "") (concatMap (show' $ n+1) cs)
+ ++ "\n" ++ (\x -> lif (not $ null x) x "") (concatMap (showMark $ n+1) cs)
 
 leaf :: Branch a -> Bool
 leaf = null.children
@@ -97,8 +97,8 @@ get' m l = if m == mark l
   else join $ find isJust $ map (get' m) (children l)
 
 newtype Withmete a = Withmete (Bool, Bool, a)
+
 instance Mark a => Show (Withmete a) where
-  show :: Withmete a -> String
   show (Withmete (l, r, m)) = "[" ++ showWorth m l ++ "/" ++ showWorth m r ++ show m ++ "]"
 
 withmete :: Mark a => Branch a -> Branch a -> [Withmete a]

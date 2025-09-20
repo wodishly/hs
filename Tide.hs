@@ -95,7 +95,7 @@ lengthen' (l, [r]) = applyWhen (worth' Bear l && isThroat r) (on Long) l
 lengthen' (l, _) = l
 
 tideshift :: Shift Bright
-tideshift = queue $ map (lurk [ly, gainbear, nosesame]) [id
+tideshift = queue $ map (lurk [gainbear, nosesame]) [id
   , toothen
   , unspread
   , soften

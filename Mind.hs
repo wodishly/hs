@@ -9,8 +9,6 @@ import Data.Function
 import Debug.Trace
 import Control.Exception
 
-data Hand = L | R deriving (Eq)
-
 type Shift a = a -> a
 type Shell a = a -> [a]
 type Shed a = [a] -> a
@@ -18,7 +16,7 @@ type Shed a = [a] -> a
 -- For fastenings
 
 loudness :: Int
-loudness = 1
+loudness = 0
 
 ly :: Show a => Shift a
 ly = ly' id
@@ -28,9 +26,16 @@ ly' f x = applyWhen (loudness > 0) (trace (show $ f x)) x
 
 -- For frith
 
+nothing :: String
+nothing = "∅"
+
 -- return the content of a singleton
-only :: Show a => Shed a
+only :: Shed a
 only xs = assert (length xs == 1) (head xs)
+
+-- assert `f x`, then return `x`
+assertively :: (a -> Bool) -> Shift a
+assertively f x = assert (f x) x
 
 -- unpack and return a contentful maybe
 recklessly :: Maybe a -> a
@@ -51,7 +56,7 @@ nright (x,y,_) = (x,y)
 -- For foldworthies
 
 none :: Foldable t => (a -> Bool) -> t a -> Bool
-none f  = not.any f
+none f = not.any f
 
 -- return all but the last n elements
 leave :: Int -> Shift [a]
@@ -65,9 +70,10 @@ keep n xs = drop (length xs - n) xs
 hit :: Int -> Shift a -> Shift [a]
 hit n f xs = take n xs ++ [f (xs!!n)] ++ drop (n+1) xs
 
+-- todo: tests
 hits :: [Int] -> Shift a -> Shift [a]
 hits [] f xs = xs
-hits ns f xs = hits (init ns) f (hit (head ns) f xs)
+hits ns f xs = hits (tail ns) f (hit (head ns) f xs)
 
 -- max of a list, so named for alikeness with foldr (but likely meaningless)
 maxr :: Shed Int
@@ -110,9 +116,9 @@ lif :: Bool -> a -> a -> a
 lif True x _ = x
 lif False _ y = y
 
--- lelse y x f = y if f x else x
-lelse :: a -> a -> (a -> Bool) -> a
-lelse y x f = lif (f x) y x
+-- return `good` unless `f good`, whereupon return `bad`
+lunless :: (a -> Bool) -> a -> a -> a
+lunless f good bad = lif (f good) bad good
 
 -- worldly begetting
 implies :: Bool -> Bool -> Bool

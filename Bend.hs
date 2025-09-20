@@ -33,7 +33,6 @@ data Bendmark = Unmark | Quick | Many
 instance Mark Bendmark where
   axled = const True
   below m m' = False
-  above = flip below
   isSteadfast = const False
 
 instance Show Bendmark where
@@ -49,7 +48,8 @@ class Meanful a where
   mean :: a -> String
 
 class Loudful a where
-  loud :: a -> Flight
+  louds :: a -> Flight
+  showLouds :: a -> String
 
 data Root = Root Flight String deriving (Eq)
 data Stem = Stem (Either Root Stem) Flight Kind deriving (Eq)
@@ -67,31 +67,34 @@ instance Meanful Stem where
     Right s -> mean s
 
 instance Loudful Root where
-  loud (Root ls s) = ls
+  louds (Root ls _) = ls
+  showLouds = ("√" ++).unstill.louds
 
 instance Loudful Stem where
-  loud (Stem rs ls k) = case rs of
-    Left r -> loud r++ls
-    Right s -> loud s++ls
+  louds (Stem rs ls k) = case rs of
+    Left r -> louds r++ls
+    Right s -> louds s++ls
+  showLouds (Stem rs ls _) = x ++ "-" ++ unstill ls where
+    x = case rs of
+      Left r -> showLouds r
+      Right s -> showLouds s
 
 instance Loudful Ending where
-  loud (Ending ls s) = ls
+  louds (Ending ls _) = ls
+  showLouds = ("-" ++).unstill.louds
 
 instance Show Root where
-  show r = "√" ++ cleans (loud r) ++ " " ++ mean r
+  show r = showLouds r ++ " " ++ mean r
 
 -- todo: beautification
 instance Show Stem where
-  show (Stem rs ls k) = x ++ "-" ++ cleans ls ++ " " ++ show k ++ " " ++ y where
+  show s@(Stem rs _ k) = showLouds s ++ " " ++ show k ++ " " ++ x where
     x = case rs of
-      Left r -> "√" ++ cleans (loud r)
-      Right s -> cleans (loud s)
-    y = case rs of
       Left r -> mean r
       Right s -> mean s
 
 instance Show Ending where
-  show (Ending ls sh) = show ls ++ " " ++ show sh
+  show e@(Ending _ sh) = showLouds e ++ " " ++ show sh
 
 unroot :: Root
 unroot = Root [] ""
@@ -111,14 +114,15 @@ instance Meanful Woord where
   mean (Woord bs k sh str) = str
 
 instance Loudful Woord where
-  loud (Woord bs k sh str) = flatten bs
+  louds (Woord bs k sh str) = flatten bs
+  showLouds (Woord bs k sh str) = cleans (flatten bs)
 
 instance Show Woord where
-  show (Woord bs k sh str) = show bs ++ " " ++ show k ++ show sh
+  show w@(Woord bs k sh str) = showLouds w ++ " " ++ show k ++ " " ++ show sh
 
-bendOne :: Stem -> Ending -> Woord
-bendOne st (Ending f sh)
-  = Woord ((queue shoals.makeBright.onbear.queue deeps) (loud st++f)) (kind st) sh (mean st)
+bendOne :: Ending -> Stem -> Woord
+bendOne (Ending f sh) st
+  = Woord ((queue shoals.makeBright.onbear.queue deeps) (louds st++f)) (kind st) sh (mean st)
 
 -- how my heart yearns within me
 bend :: [[Ending]] -> Stem -> Board
@@ -126,7 +130,7 @@ bend endings = bend' endings (queue deeps) (queue shoals)
 
 bend' :: [[Ending]] -> Shift Flight -> Shift Bright -> Stem -> Board
 bend' endings deeps shoals stem
-  = Board $ map (map (\e@(Ending ls sh) -> Woord ((shoals.makeBright.deeps) (loud stem ++ loud e)) (kind stem) sh (mean stem))) endings
+  = Board $ map (map (\e@(Ending ls sh) -> Woord ((shoals.makeBright.deeps) (louds stem ++ louds e)) (kind stem) sh (mean stem))) endings
 
 bendDeep :: [[Ending]] -> Stem -> Board
 bendDeep endings = bend' endings (queue deeps) id
@@ -144,7 +148,7 @@ newtype Board = Board { shapes :: [[Woord]] }
 
 instance Show Board where
   show b = (init.unlines)
-    (map (unwords.map (padR ((maximum.map lengthT) (concatMap (map (makeBright.loud)) (shapes b))).show)) (shapes b))
+    (map (unwords.map (padR ((maximum.map lengthT) (concatMap (map (makeBright.louds)) (shapes b))).show)) (shapes b))
 
 lemma :: Board -> Woord
 lemma = head.head.shapes

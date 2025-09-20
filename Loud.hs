@@ -28,13 +28,8 @@ data Loudmark = Tung
   deriving (Eq)
 
 instance Mark Loudmark where
-  axled :: Loudmark -> Bool
   axled = flip elem [Tung, Bear, Smooth, Throat, Choke, Thru, Mouth]
-  below :: Loudmark -> Loudmark -> Bool
   below m m' = or $ sequence [elem m', any (flip below m')] (below' m)
-  above :: Loudmark -> Loudmark -> Bool
-  above = flip below
-  isSteadfast :: Loudmark -> Bool
   isSteadfast = flip elem [Bear, Choke, Thru]
 
 below' :: Loudmark -> [Loudmark]
@@ -50,6 +45,9 @@ below' Blade = [Far, Wide]
 below' Body = [High, Fore, Back]
 below' Root = [Low, Tight]
 below' _ = []
+
+unstill :: Flight -> String
+unstill ls = lunless null (cleans ls) nothing
 
 meanLoud :: Loudmark -> Loud
 meanLoud m = Branch m True (map (off'.meanLoud) (below' m))
@@ -102,7 +100,6 @@ cleans = concatMap clean
 --                                            (lines $ show l))
 
 instance Show Loudmark where
-  show :: Loudmark -> String
   show m = applyWhen (axled m) (map toUpper) $ case m of
     Tung -> "tung"
     Bear -> "bear"
