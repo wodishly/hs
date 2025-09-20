@@ -70,11 +70,22 @@ rimhoard = [
 stemhoard :: [Stem]
 stemhoard = map (\(l,m,y) -> Stem (Left (Root (dirtys l) m)) (bud y) Unkind) allhoard
 
--- todo: encode these as roots
 endinghoard :: [[Ending]]
 endinghoard = map (map (\x -> Ending (dirtys x) unshape)) [
   ["s", "", "m", "ey", "eh1", "es", "es", "y"],
   ["es", "es", "ms", "bhys", "bhys", "bhys", "oh1om", "sw"]]
+
+--endinghoard :: [Ending]
+--endinghoard = map (\(ls, sh) -> Ending (dirtys ls) sh) [
+--   ("s", Branch Main True [Branch Mean False []])
+-- , ("m", Branch Main True [Branch Mean True []])
+-- , ("es", Branch Main False [Branch Mean False []])
+-- , ("ey", Branch Main False [Branch Mean True []])
+-- , ("es", Branch Main True [Branch Mean False []])
+-- , ("ms", Branch Main True [Branch Mean True []])
+-- , ("bhys", Branch Main False [Branch Mean False []])
+-- , ("oh1om", Branch Main False [Branch Mean True []])
+-- ]
 
 mend :: Stem -> Board
 mend = bend endinghoard

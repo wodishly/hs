@@ -29,8 +29,8 @@ allfand :: IO ()
 allfand = do
   putStrLn (assertively (== "√∅ \"\"") (show unroot))
   putStrLn (assertively (== "√∅-∅ (-) \"\"") (show unstem))
-  putStrLn (assertively (== "-∅ [-unmark]") (show unending))
-  print (assertively (== " (-) [-unmark]") (show $ bendOne unending unstem))
+  putStrLn (assertively (== "-∅ [+allmark]") (show unending))
+  print (assertively (== " (-) [+allmark]") (show $ bendOne unending unstem))
   putStrLn ""
 
   -- todo: the rest of these when im not lazy

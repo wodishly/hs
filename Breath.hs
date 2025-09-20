@@ -1,15 +1,16 @@
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 {-# HLINT ignore "Use infix" #-}
+
 module Breath where
 
 import Data.List
+import Data.Maybe
+import Data.Bifunctor
 
 import Mind
 import Token
 import Loud
 import Mark
-import Data.Maybe
-import Data.Bifunctor
 
 type Onset = Flight
 type Inset = Flight

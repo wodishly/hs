@@ -1,0 +1,2 @@
+- Think about switching from `String` to `Data.Text`.
+- Flesh out the alltree of bendmarks.

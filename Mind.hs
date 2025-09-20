@@ -22,7 +22,7 @@ ly :: Show a => Shift a
 ly = ly' id
 
 ly' :: Show b => (a -> b) -> Shift a
-ly' f x = applyWhen (loudness > 0) (trace (show $ f x)) x
+ly' f x = applyWhen (loudness > 0) ((trace.show.f) x) x
 
 -- For frith
 
@@ -62,9 +62,15 @@ none f = not.any f
 leave :: Int -> Shift [a]
 leave n xs = take (length xs - n) xs
 
+leaveT :: Int -> Shift String
+leaveT n xs = take (length xs - n) xs
+
 -- return the last n elements
 keep :: Int -> Shift [a]
 keep n xs = drop (length xs - n) xs
+
+keepT :: Int -> Shift String
+keepT n xs = drop (length xs - n) xs
 
 -- hit only the nth element
 hit :: Int -> Shift a -> Shift [a]
@@ -113,8 +119,8 @@ atwain xs = zip (init xs) (tail xs)
 
 -- lif c t p = c ? t : p
 lif :: Bool -> a -> a -> a
-lif True x _ = x
-lif False _ y = y
+lif True good _ = good
+lif False _ bad = bad
 
 -- return `good` unless `f good`, whereupon return `bad`
 lunless :: (a -> Bool) -> a -> a -> a
