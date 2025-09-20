@@ -8,6 +8,7 @@ import Breath
 import Word
 import Shift
 import Bend
+import Mark
 
 rootByMean :: String -> Root
 rootByMean s = only $ filter (\x -> s == mean x) roothoard
@@ -68,3 +69,16 @@ mend = bend endinghoard
 zg :: Shift Flight
 zg (a:b:c:rest) = lif (a == dirty "e" && not (any (worth' Bear) [b,c])) [] [a] ++ zg (b:c:rest)
 zg xs = xs
+
+-- infer yoke from stem shape
+ken :: Flight -> Stem
+ken ls = case clean (last ls) of
+  "o" -> ken' 1 OYoke ls
+  "r" -> ken' 2 RYoke ls
+  "n" -> ken' 2 NYoke ls
+  "y" -> ken' 2 GYoke ls
+  "w" -> ken' 2 GYoke ls
+  _   -> ken' 0 Unyoke ls
+
+ken' :: Int -> Yoke -> Flight -> Stem
+ken' n y ls = Stem (leave n ls) y Unkind ""

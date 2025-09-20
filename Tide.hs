@@ -11,11 +11,12 @@ import Breath
 import Word
 import Shift
 import Bend
+import Mark
 
 unring :: Shift Word
 unring = workAll $ shif
   [worths [Choke, Ring]]
-  (queue [offs [Lip]])
+  (offs [Lip])
 
 -- ky gy gyh > th dh *dhh
 toothen :: Shift Word
@@ -25,7 +26,9 @@ toothen = workAll $ shif
 
 -- bh dh *dhh gh > f lh z h
 unspread :: Shift Word
-unspread = workAll $ shif [worth' Spread] unspread'
+unspread = workAll $ shif
+  [worth' Spread]
+  unspread'
 
 unspread' :: Shift Loud
 unspread' l
@@ -42,10 +45,10 @@ outthroat = queue [workAll $ shif
 
 -- h3o > h3e
 outthroat' :: Shift Word
-outthroat' w = makeWord $ map outthroat'' (leftly $ flatten w)
+outthroat' w = makeWord $ map outthroat'' (leftly 1 $ flatten w)
 
-outthroat'' :: (Maybe Loud, Loud) -> Loud
-outthroat'' (Just l, r) = applyWhen
+outthroat'' :: (Flight, Loud) -> Loud
+outthroat'' ([l], r) = applyWhen
   (l == dirty "h3")
   (shif [worths [Bear, Ring]] (queue [on Fore, offs [Lip, Back]]))
   r
@@ -76,20 +79,20 @@ soften' l
 -- CHV > CCV
 -- todo: should probably be VCHV > VCCV
 throatsame :: Shift Word
-throatsame w = makeWord $ map throatsame' (bothly $ flatten w)
+throatsame w = makeWord $ map throatsame' (bothly 1 1 $ flatten w)
 
-throatsame' :: (Maybe Loud, Loud, Maybe Loud) -> Loud
-throatsame' (Just l, m, Just r) = applyWhen
+throatsame' :: (Flight, Loud, Flight) -> Loud
+throatsame' ([l], m, [r]) = applyWhen
   (isThroat m && not (worth' Bear l) && worth' Bear r)
   (become l)
   m
 throatsame' (_, m, _) = m
 
 lengthen :: Shift Word
-lengthen w = makeWord $ map lengthen' (rightly $ flatten w)
+lengthen w = makeWord $ map lengthen' (rightly 1 $ flatten w)
 
-lengthen' :: (Loud, Maybe Loud) -> Loud
-lengthen' (l, Just r) = applyWhen (worth' Bear l && isThroat r) (on Long) l
+lengthen' :: (Loud, Flight) -> Loud
+lengthen' (l, [r]) = applyWhen (worth' Bear l && isThroat r) (on Long) l
 lengthen' (l, _) = l
 
 tideshift :: Shift Word

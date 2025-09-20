@@ -3,25 +3,16 @@
 
 module Mind where
 
-import GHC.Clock
 import Data.List
 import Data.Maybe
 import Data.Function
 import Debug.Trace
-import Control.Monad
 import Control.Exception
 
 data Hand = L | R deriving (Eq)
 type Shift a = a -> a
 
 -- For fastenings
-
--- use :set +s
---timely :: Show b => Int -> b -> IO b
---timely n f = getMonotonicTime
---  >>= \t -> (forM_ [0..(n-1)] (\i -> putStr $ const "" f)
---  >>  (getMonotonicTime >>= \u -> print $ u - t))
---  >>  return f
 
 loudness :: Int
 loudness = 1
@@ -63,6 +54,14 @@ leave n xs = take (length xs - n) xs
 -- return the last n elements
 keep :: Int -> Shift [a]
 keep n xs = drop (length xs - n) xs
+
+-- hit only the nth element
+hit :: Int -> Shift a -> Shift [a]
+hit n f xs = take n xs ++ [f (xs!!n)] ++ drop (n+1) xs
+
+hits :: [Int] -> Shift a -> Shift [a]
+hits [] f xs = xs
+hits ns f xs = hits (init ns) f (hit (head ns) f xs)
 
 -- max of a list, so named for alikeness with foldr (but likely meaningless)
 maxr :: [Int] -> Int

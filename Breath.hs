@@ -5,6 +5,7 @@ import Data.List
 import Mind
 import Token
 import Loud
+import Mark
 
 type Onset = [Loud]
 type Inset = [Loud]
@@ -19,9 +20,6 @@ instance Show Rime where
   show :: Rime -> String
   show (Rime i o) = "(" ++ concatMap cleans [i,o] ++ ")"
 
-unrime :: Rime
-unrime = Rime [] []
-
 data Breath = Breath {
   onset :: Onset,
   rime :: Rime,
@@ -32,9 +30,24 @@ instance Show Breath where
   show :: Breath -> String
   show (Breath o r s) = "(" ++ cleans o ++ stuff ++ ")"
     where stuff = if s
-                    then "(" ++ recklessly (lookup (clean $ head (inset r)) sharps)
-                             ++ concatMap cleans [tail (inset r), offset r] ++ ")"
-                    else show r
+                  then "(" ++ recklessly (lookup (clean $ head (inset r)) sharps)
+                           ++ concatMap cleans [tail (inset r), offset r] ++ ")"
+                  else show r
+
+unrime :: Rime
+unrime = Rime [] []
+
+shiftOnset :: Shift Flight -> Shift Breath
+shiftOnset sh b = Breath (sh $ onset b) (rime b) (sharp b)
+
+shiftRime :: Shift Flight -> Shift Flight -> Shift Breath
+shiftRime sh1 sh2 b = Breath (onset b) (Rime (sh1 $ inset $ rime b) (sh2 $ offset $ rime b)) (sharp b)
+
+shiftInset :: Shift Flight -> Shift Breath
+shiftInset = flip shiftRime id
+
+shiftOffset :: Shift Flight -> Shift Breath
+shiftOffset = shiftRime id
 
 hasOnset :: Breath -> Bool
 hasOnset = full.onset
@@ -65,7 +78,6 @@ makeBreath ls = case findIndex (worth' Bear) ls of
   Nothing -> Breath ls unrime False
 
 -- todo: can probably use functors to beautify these guys
-
 thrifork :: Breath -> [Flight]
 thrifork b = filter full (map ($ b) thrifork')
 
