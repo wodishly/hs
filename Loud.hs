@@ -14,8 +14,8 @@ import Mind
 import Token
 import Mark
 
-type Flight = [Loud]
 type Loud = Branch Loudmark
+type Flight = [Loud]
 
 data Loudmark = Tung
           | Bear

@@ -10,7 +10,10 @@ import Debug.Trace
 import Control.Exception
 
 data Hand = L | R deriving (Eq)
+
 type Shift a = a -> a
+type Shell a = a -> [a]
+type Shed a = [a] -> a
 
 -- For fastenings
 
@@ -26,7 +29,7 @@ ly' f x = applyWhen (loudness > 0) (trace (show $ f x)) x
 -- For frith
 
 -- return the content of a singleton
-only :: Show a => [a] -> a
+only :: Show a => Shed a
 only xs = assert (length xs == 1) (head xs)
 
 -- unpack and return a contentful maybe
@@ -41,6 +44,9 @@ samely l r = assert (l == r) l
 
 mid :: (a,b,c) -> b
 mid (_,y,_) = y
+
+nright :: (a,b,c) -> (a,b)
+nright (x,y,_) = (x,y)
 
 -- For foldworthies
 
@@ -64,15 +70,15 @@ hits [] f xs = xs
 hits ns f xs = hits (init ns) f (hit (head ns) f xs)
 
 -- max of a list, so named for alikeness with foldr (but likely meaningless)
-maxr :: [Int] -> Int
+maxr :: Shed Int
 maxr = foldr max 0
 
 -- how my heart yearns within me!
-shell :: a -> [a]
+shell :: Shell a
 shell = (: [])
 
 -- split xs into a list of lists xss where each `last xss` gladdens `f`
-split :: (a -> Bool) -> [a] -> [[a]]
+split :: (a -> Bool) -> Shell [a]
 split f xs = split' f (map singleton xs)
 
 split' :: (a -> Bool) -> Shift [[a]]

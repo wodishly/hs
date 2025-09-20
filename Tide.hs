@@ -8,24 +8,23 @@ import Data.Function (applyWhen)
 import Mind
 import Loud
 import Breath
-import Word
 import Shift
 import Bend
 import Mark
 
-unring :: Shift Word
+unring :: Shift Bright
 unring = workAll $ shif
   [worths [Choke, Ring]]
   (offs [Lip])
 
 -- ky gy gyh > th dh *dhh
-toothen :: Shift Word
+toothen :: Shift Bright
 toothen = workAll $ shif
   [isRough, worth' Fore]
   (queue [ons [Blade, Thru, Step], offs [Body]])
 
 -- bh dh *dhh gh > f lh z h
-unspread :: Shift Word
+unspread :: Shift Bright
 unspread = workAll $ shif
   [worth' Spread]
   unspread'
@@ -38,14 +37,14 @@ unspread' l
   | otherwise = dirty "h"
 
 -- h3 > w
-outthroat :: Shift Word
+outthroat :: Shift Bright
 outthroat = queue [workAll $ shif
   [(== dirty "h3")]
   (become $ dirty "w"), outthroat']
 
 -- h3o > h3e
-outthroat' :: Shift Word
-outthroat' w = makeWord $ map outthroat'' (leftly 1 $ flatten w)
+outthroat' :: Shift Bright
+outthroat' w = makeBright $ map outthroat'' (leftly 1 $ flatten w)
 
 outthroat'' :: (Flight, Loud) -> Loud
 outthroat'' ([l], r) = applyWhen
@@ -55,18 +54,18 @@ outthroat'' ([l], r) = applyWhen
 outthroat'' (_, r) = r
 
 -- H > 0
-unthroat :: Shift Word
+unthroat :: Shift Bright
 unthroat = queue [kill isThroat, workAll $ shif [isThroat, worth' Bear] (become $ dirty "i")]
 
 -- R -> yr
-unbreath :: Shift Word
+unbreath :: Shift Bright
 unbreath = queue [
   workAll $ shif [isDerm] (\x -> lif (isThroat x) (offbearThroat x) (offs [Long, Bear] x)),
   begetl (dirty "i") isDerm
  ]
 
 -- m, n > w, y
-soften :: Shift Word
+soften :: Shift Bright
 soften = workFirst $ shif
   [worth' Nose, not.worth' Bear]
   (queue [soften', ons [Thru, High, Tight], offs [Nose, Choke, Blade]])
@@ -78,24 +77,24 @@ soften' l
 
 -- CHV > CCV
 -- todo: should probably be VCHV > VCCV
-throatsame :: Shift Word
-throatsame w = makeWord $ map throatsame' (bothly 1 1 $ flatten w)
+throatsame :: Shift Bright
+throatsame w = makeBright $ map throatsame' (bothly 1 1 $ flatten w)
 
 throatsame' :: (Flight, Loud, Flight) -> Loud
 throatsame' ([l], m, [r]) = applyWhen
   (isThroat m && not (worth' Bear l) && worth' Bear r)
   (become l)
   m
-throatsame' (_, m, _) = m
+throatsame' flf = mid flf
 
-lengthen :: Shift Word
-lengthen w = makeWord $ map lengthen' (rightly 1 $ flatten w)
+lengthen :: Shift Bright
+lengthen w = makeBright $ map lengthen' (rightly 1 $ flatten w)
 
 lengthen' :: (Loud, Flight) -> Loud
 lengthen' (l, [r]) = applyWhen (worth' Bear l && isThroat r) (on Long) l
 lengthen' (l, _) = l
 
-tideshift :: Shift Word
+tideshift :: Shift Bright
 tideshift = queue $ map (lurk [ly, gainbear, nosesame]) [id
   , toothen
   , unspread

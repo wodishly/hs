@@ -1,3 +1,5 @@
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+{-# HLINT ignore "Use infix" #-}
 module Breath where
 
 import Data.List
@@ -6,10 +8,12 @@ import Mind
 import Token
 import Loud
 import Mark
+import Data.Maybe
+import Data.Bifunctor
 
-type Onset = [Loud]
-type Inset = [Loud]
-type Offset = [Loud]
+type Onset = Flight
+type Inset = Flight
+type Offset = Flight
 
 data Rime = Rime {
   inset :: Inset,
@@ -17,7 +21,6 @@ data Rime = Rime {
 } deriving (Eq)
 
 instance Show Rime where
-  show :: Rime -> String
   show (Rime i o) = "(" ++ concatMap cleans [i,o] ++ ")"
 
 data Breath = Breath {
@@ -27,7 +30,6 @@ data Breath = Breath {
 } deriving (Eq)
 
 instance Show Breath where
-  show :: Breath -> String
   show (Breath o r s) = "(" ++ cleans o ++ stuff ++ ")"
     where stuff = if s
                   then "(" ++ recklessly (lookup (clean $ head (inset r)) sharps)
@@ -83,3 +85,44 @@ thrifork b = filter full (map ($ b) thrifork')
 
 thrifork' :: [Breath -> Flight]
 thrifork' = [onset, inset.rime, offset.rime]
+
+-- breath + flight
+-- todo: a better name
+type Bright = [Breath]
+
+-- flatten prosodic structure of word into flight of loudness
+flatten :: Bright -> Flight
+flatten (b:bs) = concat (thrifork b++[flatten bs])
+flatten w = []
+
+-- nudge the breathbreak so that the bad onset becomes a good offset
+nudge :: Shift Bright
+nudge (a:b:rest)
+  = (\(o, b') -> shiftOffset (++o) a : nudge (maybeToList b'++rest))
+    (trimBadOnset b)
+nudge w = w
+
+trimBadOnset :: Breath -> (Onset, Maybe Breath)
+trimBadOnset b
+  | (not.hasRime) b = (onset b, Nothing)
+  | (isGoodOnset.onset) b = ([], Just b)
+  | otherwise = first ([(head.onset) b] ++) (trimBadOnset $ shiftOnset tail b)
+
+-- todo: an actual version of this
+isGoodOnset :: Onset -> Bool
+isGoodOnset o = implies (length o > 1) (elem o (map dirtys ["t", "tp"]))
+
+makeBright :: Flight -> Bright
+makeBright = nudge . map makeBreath . split (worth' Bear)
+
+-- in loudness
+lengthL :: Bright -> Int
+lengthL = length' id
+
+-- in tokens
+lengthT :: Bright -> Int
+lengthT = length' cleans
+
+length' :: Foldable f => (Flight -> f a) -> Bright -> Int
+length' f bs
+  = sum (map (\b -> (sum . map (length . (\g -> (f.g) b))) thrifork') bs)

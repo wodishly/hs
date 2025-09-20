@@ -5,7 +5,6 @@ import Data.Bifunctor
 import Mind
 import Loud hiding (Root)
 import Breath
-import Word
 import Shift
 import Bend
 import Mark
@@ -14,7 +13,31 @@ rootByMean :: String -> Root
 rootByMean s = only $ filter (\x -> s == mean x) roothoard
 
 roothoard :: [Root]
-roothoard = map ((uncurry Root . first dirtys) . (\(x,y,z) -> (x,y))) allhoard
+roothoard = map ((uncurry Root . first dirtys) . nright) allhoard
+
+-- todo: put this elsewhere
+data Yoke = OYoke | GYoke | RYoke | NYoke | TYoke | Unyoke deriving (Eq)
+
+-- todo: likely useless
+bud :: Yoke -> Flight
+bud OYoke = dirtys "o"
+bud GYoke = dirtys "ey"
+bud RYoke = dirtys "er"
+bud NYoke = dirtys "en"
+bud _ = []
+
+-- infer yoke from stem shape
+-- ken :: Flight -> Stem
+-- ken ls = case clean (last ls) of
+--   "o" -> ken' 1 OYoke ls
+--   "r" -> ken' 2 RYoke ls
+--   "n" -> ken' 2 NYoke ls
+--   "y" -> ken' 2 GYoke ls
+--   "w" -> ken' 2 GYoke ls
+--   _   -> ken' 0 Unyoke ls
+-- 
+-- ken' :: Int -> Yoke -> Flight -> Stem
+-- ken' n y ls = Stem (leave n ls) y Unkind ""
 
 allhoard :: [(String, String, Yoke)]
 allhoard = concat [kinhoard, rimhoard, godhoard]
@@ -45,21 +68,11 @@ rimhoard = [
  ]
 
 stemhoard :: [Stem]
-stemhoard = map (\(l,m,y) -> Stem (dirtys l) y Unkind m) allhoard
---  map (\(x,y) -> Stem (loud (rootByMean y)) x Name y) [
---  (OYoke, "one")
---  , (OYoke, "two")
---  , (GYoke, "three")
---  , (RYoke, "four")
---  , (Unyoke, "five")
---  , (Unyoke, "six")
---  , (Unyoke, "seven")
---  , (Unyoke, "eight")
---  ]
+stemhoard = map (\(l,m,y) -> Stem (Left (Root (dirtys l) m)) (bud y) Unkind) allhoard
 
 -- todo: encode these as roots
-endinghoard :: [[Flight]]
-endinghoard = map (map dirtys) [
+endinghoard :: [[Ending]]
+endinghoard = map (map (\x -> Ending (dirtys x) unshape)) [
   ["s", "", "m", "ey", "eh1", "es", "es", "y"],
   ["es", "es", "ms", "bhys", "bhys", "bhys", "oh1om", "sw"]]
 
@@ -69,16 +82,3 @@ mend = bend endinghoard
 zg :: Shift Flight
 zg (a:b:c:rest) = lif (a == dirty "e" && not (any (worth' Bear) [b,c])) [] [a] ++ zg (b:c:rest)
 zg xs = xs
-
--- infer yoke from stem shape
-ken :: Flight -> Stem
-ken ls = case clean (last ls) of
-  "o" -> ken' 1 OYoke ls
-  "r" -> ken' 2 RYoke ls
-  "n" -> ken' 2 NYoke ls
-  "y" -> ken' 2 GYoke ls
-  "w" -> ken' 2 GYoke ls
-  _   -> ken' 0 Unyoke ls
-
-ken' :: Int -> Yoke -> Flight -> Stem
-ken' n y ls = Stem (leave n ls) y Unkind ""

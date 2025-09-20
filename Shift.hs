@@ -12,10 +12,9 @@ import Mind
 import Token
 import Loud
 import Breath
-import Word
 import Mark
 
-queue :: [Shift a] -> Shift a
+queue :: Shed (Shift a)
 queue = foldr (.) id
 
 -- if `cs`, then do shift `f` on loud `l`
@@ -27,19 +26,19 @@ borrow m l = set (get m l)
 
 -- blind to prosodic structure !!
 -- kill all in `w` that meet `c`
-kill :: (Loud -> Bool) -> Shift Word
-kill c w = makeWord $ filter (not.c) (flatten w)
+kill :: (Loud -> Bool) -> Shift Bright
+kill c w = makeBright $ filter (not.c) (flatten w)
 
 -- beget `x` before all in `w` that meet `c`
-begetl :: Loud -> (Loud -> Bool) -> Shift Word
+begetl :: Loud -> (Loud -> Bool) -> Shift Bright
 begetl = beget id
 
 -- beget `x` after all in `w` that meet `c`
-begetr :: Loud -> (Loud -> Bool) -> Shift Word
+begetr :: Loud -> (Loud -> Bool) -> Shift Bright
 begetr = beget reverse
 
-beget :: Shift Flight -> Loud -> (Loud -> Bool) -> Shift Word
-beget f x c w = makeWord $ beget' f x c (flatten w)
+beget :: Shift Flight -> Loud -> (Loud -> Bool) -> Shift Bright
+beget f x c w = makeBright $ beget' f x c (flatten w)
 
 beget' :: Shift Flight -> Loud -> (Loud -> Bool) -> Shift Flight
 beget' f x c = foldr (\l -> (++) (f (lif (c l) [x] [] ++ [l]))) []
@@ -47,7 +46,7 @@ beget' f x c = foldr (\l -> (++) (f (lif (c l) [x] [] ++ [l]))) []
 sweep :: Shift Flight
 sweep = filter (/= unloud)
 
-sweepWord :: Shift Word
+sweepWord :: Shift Bright
 sweepWord = liftBW.liftFB $ sweep
 
 -- send a flight to a flight of tuples that encodes awareness of the nearest neighbors
@@ -76,14 +75,14 @@ liftLF = map
 liftFB :: Shift Flight -> Shift Breath
 liftFB f br = shiftRime f f $ shiftOnset f br
 
-liftBW :: Shift Breath -> Shift Word
-liftBW f (Word br) = Word (map f br)
+liftBW :: Shift Breath -> Shift Bright
+liftBW = map
 
-workAll :: Shift Loud -> Shift Word
+workAll :: Shift Loud -> Shift Bright
 workAll = liftBW.liftFB.liftLF
 
-workFirst :: Shift Loud -> Shift Word
-workFirst f (Word bs) = Word (hit 0 (lif (full.onset.head $ bs) shiftOnset shiftInset (hit 0 f)) bs)
+workFirst :: Shift Loud -> Shift Bright
+workFirst f bs = hit 0 (lif (full.onset.head $ bs) shiftOnset shiftInset (hit 0 f)) bs
 
 onbear :: Shift Flight
 onbear ls = map onbear' (bothly 1 1 ls)
@@ -96,18 +95,18 @@ onbear' ([l], m, [r]) = applyWhen (not (any (worth' Bear) [l, r]))
   m
 onbear' (_, m, _) = m
 
-gainbear :: Shift Word
-gainbear = makeWord.onbear.flatten
+gainbear :: Shift Bright
+gainbear = makeBright.onbear.flatten
 
-nosesame :: Shift Word
-nosesame w = makeWord $ map nosesame' (rightly 1 $ flatten w)
+nosesame :: Shift Bright
+nosesame w = makeBright $ map nosesame' (rightly 1 $ flatten w)
 
 nosesame' :: (Loud, Flight) -> Loud
-nosesame' (l, [r]) = applyWhen (worth' Nose l && isRough r) (borrow Mouth r) l
+nosesame' (l, [r]) = applyWhen (worth' Nose l && isRough r && (not.worth' Thru) r) (borrow Mouth r) l
 nosesame' (l, []) = l
 
--- todo: prove if this is a natural transformation omg
-lurk :: [Shift Word] -> Shift (Shift Word)
+-- todo: prove if this is a natural transformation omg i exit
+lurk :: [Shift Bright] -> Shift (Shift Bright)
 lurk shs f = queue (shs++[f])
 
 --workFirst' :: Shift a -> Shift [a]

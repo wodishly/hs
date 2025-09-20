@@ -88,16 +88,16 @@ sharps = [
 shadesOf :: Int -> [(String, String)]
 shadesOf n = filter (\x -> length (fst x) == n) shades
 
-betoken :: String -> [String]
+betoken :: Shell String
 betoken s = filter (/= ".") (betoken' (maxr (map (length.fst) shades)) (map shell s))
 
 -- inwend on length of n-graph
-betoken' :: Int -> [String] -> [String]
+betoken' :: Int -> Shift [String]
 betoken' 0 s = s
 betoken' n s = betoken' (n-1) (betoken'' n s)
 
 -- leftfare through `s` on `n`
-betoken'' :: Int -> [String] -> [String]
+betoken'' :: Int -> Shift [String]
 betoken'' n [] = []
 betoken'' n s = lif (length s >= n)
   (lif (elem (concat (keep n s)) (map fst (shadesOf n)))

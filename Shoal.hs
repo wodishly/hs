@@ -8,11 +8,11 @@ import Token
 import Mark
 import Loud
 import Breath
-import Word 
 import Shift
 import Bend
 import Eldtung
 import Tide
+import Fand
 
 --main :: IO ()
 --main = forM_ [0..(length bundles-1)]
