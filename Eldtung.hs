@@ -40,7 +40,7 @@ bud _ = []
 -- ken' n y ls = Stem (leave n ls) y Unkind ""
 
 allhoard :: [(String, String, Yoke)]
-allhoard = concat [kinhoard, rimhoard, godhoard]
+allhoard = rimhoard --concat [kinhoard, rimhoard, godhoard]
 
 kinhoard :: [(String, String, Yoke)]
 kinhoard = [
@@ -65,10 +65,15 @@ rimhoard = [
  , ("sweky", "six", Unyoke)
  , ("septM", "seven", Unyoke)
  , ("h3ekyteh3", "eight", Unyoke)
+ , ("h1newn", "nine", Unyoke)
+ , ("dekym", "ten", Unyoke)
  ]
 
 stemhoard :: [Stem]
-stemhoard = map (\(l,m,y) -> Stem (Left (Root (dirtys l) m)) (bud y) Unkind) allhoard
+stemhoard = stemhoard' allhoard
+
+stemhoard' :: [(String, String, Yoke)] -> [Stem]
+stemhoard' = map (\(l,m,y) -> Stem (Left (Root (dirtys l) m)) (bud y) Unkind)
 
 --endinghoard :: [[Ending]]
 --endinghoard = map (map (\x -> Ending (dirtys x) unshape)) [

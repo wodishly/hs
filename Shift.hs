@@ -47,7 +47,7 @@ sweep :: Shift Flight
 sweep = filter (/= unloud)
 
 sweepWord :: Shift Bright
-sweepWord = liftBW.liftFB $ sweep
+sweepWord = float sweep
 
 -- send a flight to a flight of tuples that encodes awareness of the nearest neighbors
 
@@ -69,17 +69,16 @@ bothly :: Int -> Int -> Flight -> [(Flight, Loud, Flight)]
 bothly m n ls = zipWith (\x y -> (fst x, samely (snd x) (fst y), snd y))
   (leftly m ls) (rightly n ls)
 
-liftLF :: Shift Loud -> Shift Flight
-liftLF = map
+-- deepshift to shoalshift
+float :: Shift Flight -> Shift Bright
+float f = map (shiftRime f f.shiftOnset f)
 
-liftFB :: Shift Flight -> Shift Breath
-liftFB f br = shiftRime f f $ shiftOnset f br
-
-liftBW :: Shift Breath -> Shift Bright
-liftBW = map
+-- shoalshift to deepshift
+sink :: Shift Bright -> Shift Flight
+sink f = flatten.f.makeBright
 
 workAll :: Shift Loud -> Shift Bright
-workAll = liftBW.liftFB.liftLF
+workAll = float.map
 
 workFirst :: Shift Loud -> Shift Bright
 workFirst f bs = hit 0 (lif (full.onset.head $ bs) shiftOnset shiftInset (hit 0 f)) bs
@@ -101,9 +100,17 @@ nosesame' :: (Loud, Flight) -> Loud
 nosesame' (l, [r]) = applyWhen (worth' Nose l && isRough r && (not.worth' Thru) r) (borrow Mouth r) l
 nosesame' (l, []) = l
 
+-- todo: this
+stavefold :: Shift Bright
+stavefold bs = bs
+
 -- todo: prove if this is a natural transformation omg i exit
 lurk :: [Shift Bright] -> Shift (Shift Bright)
 lurk shs f = queue (shs++[f])
+
+-- do `f` until `br == f br`
+gainly :: Shift Bright -> Shift Bright
+gainly f br = lunless (/= br) (f br) (gainly f (f br))
 
 --workFirst' :: Shift a -> Shift [a]
 --workFirst' f xs = f (head xs) : tail xs

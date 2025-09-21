@@ -27,27 +27,6 @@ fandending = Ending (dirtys "syo") (Branch Quick True [Branch Many True []])
 
 allfand :: IO ()
 allfand = do
-  putStrLn (assertively (== "√∅ \"\"") (show unroot))
-  putStrLn (assertively (== "√∅-∅ (-) \"\"") (show unstem))
-  putStrLn (assertively (== "-∅ [+allmark]") (show unending))
-  print (assertively (== " (-) [+allmark]") (show $ bendOne unending unstem))
-  putStrLn ""
-
-  -- todo: the rest of these when im not lazy
-  putStrLn (assertively (== "√gʸneh₃ \"know\"") (show fandroot))
-  print fandstem
-  print fanderstem
-  print fandeststem
-  print fandending
-  putStrLn ""
-
-  print (bendOne fandending fandstem)
-  print (bend [[fandending]] fandstem)
-  print (bend [[fandending, unending]] fandstem)
-  print (bend [[fandending], [unending]] fandstem)
-  putStrLn ""
-
-  print (stemhoard!!1)
-  print (mend (stemhoard!!1))
-  print (lend [[unending]] (stemhoard!!1))
-  mapM_ putStrLn (concatMap (concatMap (map (cleans.flatten.tideshift.makeBright.louds)).shapes.bend endinghoard) stemhoard)
+  mapM_ putStrLn (concatMap (concatMap
+    (map (cleans.flatten.tideshift.makeBright.louds))
+      .shapes.bend endinghoard) stemhoard)

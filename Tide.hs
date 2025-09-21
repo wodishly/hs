@@ -99,8 +99,7 @@ tideshift = queue $ map (lurk [gainbear, nosesame]) [id
   , toothen
   , unspread
   , soften
-  , unbreath -- once for each adjacent syllabic!
-  , unbreath
+  , gainly unbreath
   , unthroat
   , unring
   , outthroat

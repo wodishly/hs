@@ -8,7 +8,6 @@ import Data.Maybe
 import Data.Function
 import Debug.Trace
 import Control.Exception
-import qualified Data.Text as T
 
 type Shift a = a -> a
 type Shell a = a -> [a]
@@ -63,15 +62,9 @@ none f = not.any f
 leave :: Int -> Shift [a]
 leave n xs = take (length xs - n) xs
 
-leaveT :: Int -> Shift T.Text
-leaveT n xs = T.take (T.length xs - n) xs
-
 -- return the last n elements
 scoop :: Int -> Shift [a]
 scoop n xs = drop (length xs - n) xs
-
-scoopT :: Int -> Shift T.Text
-scoopT n xs = T.drop (T.length xs - n) xs
 
 -- hit only the nth element
 hit :: Int -> Shift a -> Shift [a]
