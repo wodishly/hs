@@ -50,6 +50,4 @@ allfand = do
   print (stemhoard!!1)
   print (mend (stemhoard!!1))
   print (lend [[unending]] (stemhoard!!1))
-  forM_ (concatMap (map (cleans.flatten.tideshift.makeBright.louds))
-                   ((shapes.mend.(!!1)) stemhoard)
-        ) putStrLn
+  mapM_ putStrLn (concatMap (concatMap (map (cleans.flatten.tideshift.makeBright.louds)).shapes.bend endinghoard) stemhoard)

@@ -12,10 +12,14 @@ import Mind
 
 class (Show a, Eq a) => Mark a where
   axled :: a -> Bool
+  isSteadfast :: a -> Bool
+  below' :: Shell a
   below :: a -> a -> Bool
+  below m m' = or $ sequence [elem m', any (flip below m')] (below' m)
   above :: a -> a -> Bool
   above = flip below
-  isSteadfast :: a -> Bool
+  def :: a -> Branch a
+  def m = Branch m True (map (off'.def) (below' m))
 
 data Branch a = Branch {
   mark :: a,

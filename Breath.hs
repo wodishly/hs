@@ -111,7 +111,7 @@ trimBadOnset b
 
 -- todo: an actual version of this
 isGoodOnset :: Onset -> Bool
-isGoodOnset o = implies (length o > 1) (elem o (map dirtys ["t", "tp"]))
+isGoodOnset o = implieth (length o > 1) (elem o (map dirtys ["t", "tp"]))
 
 makeBright :: Flight -> Bright
 makeBright = nudge . map makeBreath . split (worth' Bear)

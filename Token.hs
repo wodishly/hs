@@ -100,8 +100,8 @@ betoken' n s = betoken' (n-1) (betoken'' n s)
 betoken'' :: Int -> Shift [String]
 betoken'' n [] = []
 betoken'' n s = lif (length s >= n)
-  (lif (elem (concat (keep n s)) (map fst (shadesOf n)))
-    (betoken'' n (leave n s) ++ [concat (keep n s)])
+  (lif (elem (concat (scoop n s)) (map fst (shadesOf n)))
+    (betoken'' n (leave n s) ++ [concat (scoop n s)])
     (betoken'' n (init s) ++ [last s]))
   s
 -- todo: if runtime becomes bad then think about reviving this implementation

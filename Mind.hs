@@ -8,6 +8,7 @@ import Data.Maybe
 import Data.Function
 import Debug.Trace
 import Control.Exception
+import qualified Data.Text as T
 
 type Shift a = a -> a
 type Shell a = a -> [a]
@@ -16,7 +17,7 @@ type Shed a = [a] -> a
 -- For fastenings
 
 loudness :: Int
-loudness = 0
+loudness = 1
 
 ly :: Show a => Shift a
 ly = ly' id
@@ -62,15 +63,15 @@ none f = not.any f
 leave :: Int -> Shift [a]
 leave n xs = take (length xs - n) xs
 
-leaveT :: Int -> Shift String
-leaveT n xs = take (length xs - n) xs
+leaveT :: Int -> Shift T.Text
+leaveT n xs = T.take (T.length xs - n) xs
 
 -- return the last n elements
-keep :: Int -> Shift [a]
-keep n xs = drop (length xs - n) xs
+scoop :: Int -> Shift [a]
+scoop n xs = drop (length xs - n) xs
 
-keepT :: Int -> Shift String
-keepT n xs = drop (length xs - n) xs
+scoopT :: Int -> Shift T.Text
+scoopT n xs = T.drop (T.length xs - n) xs
 
 -- hit only the nth element
 hit :: Int -> Shift a -> Shift [a]
@@ -104,12 +105,12 @@ full :: [a] -> Bool
 full = not.null
 
 -- if `x` is an initial segment of `y`
-begins :: Eq a => [a] -> [a] -> Bool
-begins y x = x == take (length x) y
+begineth :: Eq a => [a] -> [a] -> Bool
+begineth y x = x == take (length x) y
 
 -- vzw. terminal
-ends :: Eq a => [a] -> [a] -> Bool
-ends y x = x == keep (length x) y
+endeth :: Eq a => [a] -> [a] -> Bool
+endeth y x = x == scoop (length x) y
 
 -- [1,2,3,4,…] -> [(1,2), (2,3), (3,4), …]
 atwain :: [a] -> [(a,a)]
@@ -127,8 +128,8 @@ lunless :: (a -> Bool) -> a -> a -> a
 lunless f good bad = lif (f good) bad good
 
 -- worldly begetting
-implies :: Bool -> Bool -> Bool
-implies p q = not p || q
+implieth :: Bool -> Bool -> Bool
+implieth p q = not p || q
 
 -- For fainwell
 
@@ -141,4 +142,14 @@ twifold x xs = twifold' (xs ++ lif (odd (length xs)) [x] [])
 
 -- put the latter half of the list as the second component of tuples to the former half
 twifold' :: [a] -> [(a,a)]
-twifold' xs = (\l -> zip (take l xs) (drop l xs)) (div (length xs) 2)
+twifold' = chunkwise zip 2
+
+-- chunk `xs` into a `n`-element list `xss`
+stack :: Show a => Int -> Shell [a]
+stack 1 = shell
+stack n = chunkwise (\x y -> x : stack (n-1) y) n
+
+-- todo: narrow the type of `b`
+-- break up `xs` into `n` chunks, and then rebuild using `f`
+chunkwise :: ([a] -> [a] -> [b]) -> Int -> [a] -> [b]
+chunkwise f n xs = (\l -> f (take l xs) (drop l xs)) (div (length xs) n)

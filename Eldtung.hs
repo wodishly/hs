@@ -10,7 +10,7 @@ import Bend
 import Mark
 
 rootByMean :: String -> Root
-rootByMean s = only $ filter (\x -> s == mean x) roothoard
+rootByMean s = only $ filter (\x -> s == meaning x) roothoard
 
 roothoard :: [Root]
 roothoard = map ((uncurry Root . first dirtys) . nright) allhoard
@@ -70,22 +70,22 @@ rimhoard = [
 stemhoard :: [Stem]
 stemhoard = map (\(l,m,y) -> Stem (Left (Root (dirtys l) m)) (bud y) Unkind) allhoard
 
-endinghoard :: [[Ending]]
-endinghoard = map (map (\x -> Ending (dirtys x) unshape)) [
-  ["s", "", "m", "ey", "eh1", "es", "es", "y"],
-  ["es", "es", "ms", "bhys", "bhys", "bhys", "oh1om", "sw"]]
+--endinghoard :: [[Ending]]
+--endinghoard = map (map (\x -> Ending (dirtys x) unshape)) [
+--  ["s", "", "m", "ey", "eh1", "es", "es", "y"],
+--  ["es", "es", "ms", "bhys", "bhys", "bhys", "oh1om", "sw"]]
 
---endinghoard :: [Ending]
---endinghoard = map (\(ls, sh) -> Ending (dirtys ls) sh) [
---   ("s", Branch Main True [Branch Mean False []])
--- , ("m", Branch Main True [Branch Mean True []])
--- , ("es", Branch Main False [Branch Mean False []])
--- , ("ey", Branch Main False [Branch Mean True []])
--- , ("es", Branch Main True [Branch Mean False []])
--- , ("ms", Branch Main True [Branch Mean True []])
--- , ("bhys", Branch Main False [Branch Mean False []])
--- , ("oh1om", Branch Main False [Branch Mean True []])
--- ]
+endinghoard :: [[Ending]]
+endinghoard = stack 2 $ map (\(ls, sh) -> Ending (dirtys ls) sh) [
+   ("s", ons [Main] $ def Allmark)
+ , ("m", ons [Main, Mean] $ def Allmark)
+ , ("es", ons [] $ def Allmark)
+ , ("ey", ons [Mean] $ def Allmark)
+ , ("es", ons [Many, Main] $ def Allmark)
+ , ("ms", ons [Many, Main, Mean] $ def Allmark)
+ , ("oh1om", ons [Many] $ def Allmark)
+ , ("bhys", ons [Many, Mean] $ def Allmark)
+ ]
 
 mend :: Stem -> Board
 mend = bend endinghoard

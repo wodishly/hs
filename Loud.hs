@@ -29,37 +29,31 @@ data Loudmark = Tung
 
 instance Mark Loudmark where
   axled = flip elem [Tung, Bear, Smooth, Throat, Choke, Thru, Mouth]
-  below m m' = or $ sequence [elem m', any (flip below m')] (below' m)
   isSteadfast = flip elem [Bear, Choke, Thru]
-
-below' :: Loudmark -> [Loudmark]
-below' Tung = [Bear, Choke]
-below' Bear = [Smooth, Throat, Long]
-below' Smooth = [Nose]
-below' Throat = [Stave, Spread, Clench]
-below' Choke = [Thru, Mouth]
-below' Thru = [Side, Step, Strong]
-below' Mouth = [Lip, Blade, Body, Root]
-below' Lip = [Ring]
-below' Blade = [Far, Wide]
-below' Body = [High, Fore, Back]
-below' Root = [Low, Tight]
-below' _ = []
+  below' Tung = [Bear, Choke]
+  below' Bear = [Smooth, Throat, Long]
+  below' Smooth = [Nose]
+  below' Throat = [Stave, Spread, Clench]
+  below' Choke = [Thru, Mouth]
+  below' Thru = [Side, Step, Strong]
+  below' Mouth = [Lip, Blade, Body, Root]
+  below' Lip = [Ring]
+  below' Blade = [Far, Wide]
+  below' Body = [High, Fore, Back]
+  below' Root = [Low, Tight]
+  below' _ = []
 
 unstill :: Flight -> String
 unstill ls = lunless null (cleans ls) nothing
 
-meanLoud :: Loudmark -> Loud
-meanLoud m = Branch m True (map (off'.meanLoud) (below' m))
-
 meanBear :: Loud
-meanBear = ons [Bear, Smooth, Stave, Thru, Body, Low] $ meanLoud Tung
+meanBear = ons [Bear, Smooth, Stave, Thru, Body, Low] $ def Tung
 
 meanChoke :: Loud
-meanChoke = ons [Choke] $ meanLoud Tung
+meanChoke = ons [Choke] $ def Tung
 
 unloud :: Loud
-unloud = off Tung $ meanLoud Tung
+unloud = off Tung $ def Tung
 
 isGlide :: Loud -> Bool
 isGlide x = none (flip worth' x) [Bear, Choke]

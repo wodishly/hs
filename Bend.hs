@@ -28,20 +28,20 @@ instance Show Kind where
 -- [-main, +mean] = dat
 -- [-main, -mean] = gen
 -- main > mean
-data Bendmark = Allmark | Unmark | Quick | Man | Many | Main | Mean
+data Bendmark = Allmark | Quick | Man | Many | Main | Mean
   deriving (Eq)
 
--- todo: these
+-- todo: these some more
 instance Mark Bendmark where
   axled = const True
--- todo: flesh
-  below m m' = m == Allmark || (m == Main && m' == Mean)
   isSteadfast = const True
+  below' Allmark = [Quick, Man, Many, Main, Mean]
+  below' Main = [Mean]
+  below' _ = []
 
 instance Show Bendmark where
   show m = case m of
     Allmark -> "allmark"
-    Unmark -> "unmark"
     Quick -> "quick"
     Many -> "many"
     Man -> "man"
@@ -51,8 +51,8 @@ instance Show Bendmark where
 class Kindful a where
   kind :: a -> Kind
 
-class Meanful a where
-  mean :: a -> String
+class Meaningful a where
+  meaning :: a -> String
 
 class Loudful a where
   louds :: a -> Flight
@@ -65,13 +65,13 @@ data Ending = Ending Flight Shape deriving (Eq)
 instance Kindful Stem where
   kind (Stem _ _ k) = k
 
-instance Meanful Root where
-  mean (Root _ s) = "\"" ++ s ++ "\""
+instance Meaningful Root where
+  meaning (Root _ s) = "\"" ++ s ++ "\""
 
-instance Meanful Stem where
-  mean (Stem rs _ _) = case rs of
-    Left r -> mean r
-    Right s -> mean s
+instance Meaningful Stem where
+  meaning (Stem rs _ _) = case rs of
+    Left r -> meaning r
+    Right s -> meaning s
 
 instance Loudful Root where
   louds (Root ls _) = ls
@@ -91,14 +91,14 @@ instance Loudful Ending where
   showLouds = ("-" ++).unstill.louds
 
 instance Show Root where
-  show r = showLouds r ++ " " ++ mean r
+  show r = showLouds r ++ " " ++ meaning r
 
 -- todo: beautification
 instance Show Stem where
   show s@(Stem rs _ k) = showLouds s ++ " " ++ show k ++ " " ++ x where
     x = case rs of
-      Left r -> mean r
-      Right s -> mean s
+      Left r -> meaning r
+      Right s -> meaning s
 
 instance Show Ending where
   show e@(Ending _ sh) = showLouds e ++ " " ++ show sh
@@ -120,8 +120,8 @@ data Woord = Woord Bright Kind Shape String deriving (Eq)
 instance Kindful Woord where
   kind (Woord _ k _ _) = k
 
-instance Meanful Woord where
-  mean (Woord _ _ _ str) = str
+instance Meaningful Woord where
+  meaning (Woord _ _ _ str) = str
 
 instance Loudful Woord where
   louds (Woord bs _ _ _) = flatten bs
@@ -132,7 +132,7 @@ instance Show Woord where
 
 bendOne :: Ending -> Stem -> Woord
 bendOne (Ending f sh) st
-  = Woord ((queue shoals.makeBright.onbear.queue deeps) (louds st++f)) (kind st) sh (mean st)
+  = Woord ((queue shoals.makeBright.onbear.queue deeps) (louds st++f)) (kind st) sh (meaning st)
 
 -- how my heart yearns within me
 bend :: [[Ending]] -> Stem -> Board
@@ -140,7 +140,7 @@ bend endings = bend' endings (queue deeps) (queue shoals)
 
 bend' :: [[Ending]] -> Shift Flight -> Shift Bright -> Stem -> Board
 bend' endings deeps shoals stem
-  = Board $ map (map (\e@(Ending _ sh) -> Woord ((shoals.makeBright.deeps) (louds stem ++ louds e)) (kind stem) sh (mean stem))) endings
+  = Board $ map (map (\e@(Ending _ sh) -> Woord ((shoals.makeBright.deeps) (louds stem ++ louds e)) (kind stem) sh (meaning stem))) endings
 
 bendDeep :: [[Ending]] -> Stem -> Board
 bendDeep endings = bend' endings (queue deeps) id
@@ -158,7 +158,9 @@ newtype Board = Board { shapes :: [[Woord]] }
 
 instance Show Board where
   show b = (init.unlines)
-    (map (unwords.map (padR ((maximum.map lengthT) (concatMap (map (makeBright.louds)) (shapes b))).show)) (shapes b))
+    (map (unwords.map (padR ((maximum.map lengthT)
+                             (concatMap (map (makeBright.louds)) (shapes b))).show))
+         (shapes b))
 
 lemma :: Board -> Woord
 lemma = head.head.shapes
