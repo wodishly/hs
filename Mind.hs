@@ -56,7 +56,7 @@ nright (x,y,_) = (x,y)
 -- For foldworthies
 
 none :: Foldable t => (a -> Bool) -> t a -> Bool
-none f = not.any f
+none = (not .) . any
 
 -- return all but the last n elements
 leave :: Int -> Shift [a]
@@ -72,12 +72,8 @@ hit n f xs = take n xs ++ [f (xs!!n)] ++ drop (n+1) xs
 
 -- todo: tests
 hits :: [Int] -> Shift a -> Shift [a]
-hits [] f xs = xs
-hits ns f xs = hits (tail ns) f (hit (head ns) f xs)
-
--- max of a list, so named for alikeness with foldr (but likely meaningless)
-maxr :: Shed Int
-maxr = foldr max 0
+hits [] f = id
+hits ns f = hits (tail ns) f . hit (head ns) f
 
 -- how my heart yearns within me!
 shell :: Shell a
@@ -85,7 +81,7 @@ shell = (: [])
 
 -- split xs into a list of lists xss where each `last xss` gladdens `f`
 split :: (a -> Bool) -> Shell [a]
-split f xs = split' f (map singleton xs)
+split = flip (.) (map singleton) . split'
 
 split' :: (a -> Bool) -> Shift [[a]]
 split' f (a:b:rest) = lif
@@ -96,6 +92,9 @@ split' _ xs = xs
 
 full :: [a] -> Bool
 full = not.null
+
+manifold :: [a] -> Bool
+manifold = (> 1) . length
 
 -- if `x` is an initial segment of `y`
 begineth :: Eq a => [a] -> [a] -> Bool
@@ -116,13 +115,16 @@ lif :: Bool -> a -> a -> a
 lif True good _ = good
 lif False _ bad = bad
 
+lifmap :: (a -> Bool) -> (a -> b) -> (a -> b) -> a -> b
+lifmap f good bad x = lif (f x) (good x) (bad x)
+
 -- return `good` unless `f good`, whereupon return `bad`
 lunless :: (a -> Bool) -> a -> a -> a
 lunless f good bad = lif (f good) bad good
 
 -- worldly begetting
 implieth :: Bool -> Bool -> Bool
-implieth p q = not p || q
+implieth = (||) . not
 
 -- For fainwell
 
@@ -131,11 +133,16 @@ padR n s = lif (length s < n) (padR n (s++" ")) s
 
 -- wrapper to handle oddness
 twifold :: a -> [a] -> [(a,a)]
-twifold x xs = twifold' (xs ++ lif (odd (length xs)) [x] [])
+twifold peanuts xs = twifold' (xs ++ lif (odd (length xs)) [peanuts] [])
 
 -- put the latter half of the list as the second component of tuples to the former half
 twifold' :: [a] -> [(a,a)]
 twifold' = chunkwise zip 2
+
+-- show the list `ss` in two columns
+twishow :: Shed String
+twishow = init . concatMap (flip (++) "\n".uncurry (++))
+  . twifold "" . (\x -> map ((padR.maximum.map length) x) x)
 
 -- chunk `xs` into a `n`-element list `xss`
 stack :: Show a => Int -> Shell [a]

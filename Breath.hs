@@ -8,9 +8,9 @@ import Data.Maybe
 import Data.Bifunctor
 
 import Mind
+import Mark
 import Token
 import Loud
-import Mark
 
 type Onset = Flight
 type Inset = Flight
@@ -62,7 +62,7 @@ hasOffset :: Breath -> Bool
 hasOffset = full.offset.rime
 
 hasRime :: Breath -> Bool
-hasRime b = hasInset b || hasOffset b
+hasRime = flip any [hasInset, hasOffset] . flip ($)
 
 isHeavy :: Breath -> Bool
 isHeavy = hasOffset
@@ -82,7 +82,7 @@ makeBreath ls = case findIndex (worth' Bear) ls of
 
 -- todo: can probably use functors to beautify these guys
 thrifork :: Breath -> [Flight]
-thrifork b = filter full (map ($ b) thrifork')
+thrifork = filter full . flip map thrifork' . flip ($)
 
 thrifork' :: [Breath -> Flight]
 thrifork' = [onset, inset.rime, offset.rime]
@@ -111,7 +111,7 @@ trimBadOnset b
 
 -- todo: an actual version of this
 isGoodOnset :: Onset -> Bool
-isGoodOnset o = implieth (length o > 1) (elem o (map dirtys ["t", "tp"]))
+isGoodOnset o = implieth (manifold o) (elem o (map dirtys ["t", "tp"]))
 
 makeBright :: Flight -> Bright
 makeBright = nudge . map makeBreath . split (worth' Bear)
@@ -125,5 +125,5 @@ lengthT :: Bright -> Int
 lengthT = length' cleans
 
 length' :: Foldable f => (Flight -> f a) -> Bright -> Int
-length' f bs
-  = sum (map (\b -> (sum . map (length . (\g -> (f.g) b))) thrifork') bs)
+length' f
+  = sum . map (\b -> (sum . map (length . (\g -> (f.g) b))) thrifork')

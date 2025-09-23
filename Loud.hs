@@ -11,8 +11,8 @@ import Data.Function (applyWhen)
 import Control.Monad
 
 import Mind
-import Token
 import Mark
+import Token
 
 type Loud = Branch Loudmark
 type Flight = [Loud]
@@ -44,19 +44,19 @@ instance Mark Loudmark where
   below' _ = []
 
 unstill :: Flight -> String
-unstill ls = lunless null (cleans ls) nothing
+unstill = flip (lunless null) nothing . cleans
 
 meanBear :: Loud
-meanBear = ons [Bear, Smooth, Stave, Thru, Body, Low] $ def Tung
+meanBear = ons [Bear, Smooth, Stave, Thru, Body, Low] (def Tung)
 
 meanChoke :: Loud
-meanChoke = ons [Choke] $ def Tung
+meanChoke = ons [Choke] (def Tung)
 
 unloud :: Loud
-unloud = off Tung $ def Tung
+unloud = off Tung (def Tung)
 
 isGlide :: Loud -> Bool
-isGlide x = none (flip worth' x) [Bear, Choke]
+isGlide = flip none [Bear, Choke] . flip worth'
 
 isDerm :: Loud -> Bool
 isDerm = worths [Bear, Choke]
@@ -65,7 +65,10 @@ isRough :: Loud -> Bool
 isRough = not.worth' Smooth
 
 isThroat :: Loud -> Bool
-isThroat l = all ($ l) [not.worth' Root, worths [Thru, Body]]
+isThroat = flip all [not.worth' Root, worths [Thru, Body]] . flip ($)
+
+unbear :: Shift Loud
+unbear = offs [Bear, Long]
 
 onbearThroat :: Shift Loud
 onbearThroat = ons [Bear, Smooth, Stave] . offs [Step, Strong]
@@ -82,16 +85,10 @@ clean l = fromMaybe (error $ "clean of " ++ show l ++ " not found")
                     (lookup l (map swap bundles))
 
 dirtys :: String -> Flight
-dirtys x = map dirty (betoken x)
+dirtys = map dirty . betoken
 
 cleans :: Flight -> String
 cleans = concatMap clean
-
--- todo: does this come back?
---twishow :: Loud -> String
---twishow l = init $ concatMap (\x -> uncurry (++) x ++ "\n")
---                             (twifold "" $ (\x -> map (padR $ maximum $ map length x) x)
---                                            (lines $ show l))
 
 instance Show Loudmark where
   show m = applyWhen (axled m) (map toUpper) $ case m of
@@ -121,7 +118,7 @@ instance Show Loudmark where
     Root -> "root"
     Low -> "low"
     Tight -> "tight"
-    Long -> "long" -- todo: i am fearful
+    Long -> "long"
 
 -- reach with `clean` and `dirty`
 bundles :: [(String, Loud)]

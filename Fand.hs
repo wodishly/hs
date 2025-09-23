@@ -1,14 +1,14 @@
 module Fand where
 
-import Loud hiding (Root)
-import Bend
-import Mark
-import Eldtung
-import Breath
-import Tide
-import Shift
-import Mind
 import Control.Monad
+
+import Mind
+import Mark
+import Loud hiding (Root)
+import Breath
+import Shift
+import Bend
+import Eldtung
 
 fandroot :: Root
 fandroot = Root (dirtys "gyneh3") "know"
@@ -29,4 +29,12 @@ allfand :: IO ()
 allfand = do
   mapM_ putStrLn (concatMap (concatMap
     (map (cleans.flatten.tideshift.makeBright.louds))
-      .shapes.bend endinghoard) stemhoard)
+      .shapes.mend) stemhoard)
+
+stavefoldfand :: IO ()
+stavefoldfand = foldl (>>) mempty
+  (map (print.stavefold.makeBright.dirtys)
+  ["snom", "snoom", "snooom", "snoooom",
+   "snōm", "snoōm", "snōom", "snoōom",
+   "o", "oo", "ō", "ōo", "oō", "ōō", 
+   "owo", "owō", "ōwo", "ōwō"])

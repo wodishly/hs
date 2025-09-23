@@ -4,8 +4,8 @@
 module Mark where
 
 import Control.Monad
-import Data.Foldable
 import Data.Maybe
+import Data.Foldable
 import Data.Function (applyWhen)
 
 import Mind
@@ -27,8 +27,11 @@ data Branch a = Branch {
   children :: [Branch a]
 } deriving (Eq)
 
+-- todo
+-- instance Functor Branch where
+
 instance Mark a => Show (Branch a) where
-  show l = init (showMark 0 l)
+  show = init . showMark 0
 
 showWorth :: Mark a => a -> Bool -> String
 showWorth m b = lif b "+" (lif (axled m) "-" "0")
@@ -46,7 +49,7 @@ worth' :: Mark a => a -> Branch a -> Bool
 worth' m' (Branch m w cs) = m==m' && w || any (worth' m') cs
 
 worths :: Mark a => [a] -> Branch a -> Bool
-worths ms l = all (flip worth' l) ms
+worths = flip (.) (flip worth') . flip all
 
 become :: Mark a => Branch a -> Shift (Branch a)
 become = const
@@ -74,8 +77,6 @@ set b l = if mark b == mark l
   then b
   else fandUp $ Branch (mark l) (worth l) (map (set b) (children l))
 
--- todo: write fandDown, refactor off['/s]? as needed
--- todo: become brave enough to do this :(
 fandUp :: Mark a => Shift (Branch a)
 fandUp (Branch m w cs) = (\x -> Branch m (lif (isSteadfast m || not (any worth x)) w True) x)
                          (map fandUp cs)

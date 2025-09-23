@@ -9,7 +9,7 @@ import Mind
 shades :: [(String, String)]
 shades = [
    ("th", "θ")
- , ("dd", "ð") -- todo: fraught!
+ , ("dd", "ð")
  , ("lh", "ɬ")
  , ("lz", "ɮ")
 
@@ -69,32 +69,16 @@ sharps = [
  , ("u", "ú")
  ]
 
---longs :: [(String, String)]
---longs = [
---   ("a", "ā")
--- , ("e", "ē")
--- , ("i", "ī")
--- , ("o", "ō")
--- , ("u", "ū")
--- , ("m̩", "m̩̄")
--- , ("n̩", "n̩̄")
--- , ("l̩", "l̩̄")
--- , ("r̩", "r̩̄")
--- , ("ə₁", "ə̄₁")
--- , ("ə₂", "ə̄₂")
--- , ("ə₃", "ə̄₃")
--- ]
-
 shadesOf :: Int -> [(String, String)]
-shadesOf n = filter (\x -> length (fst x) == n) shades
+shadesOf = flip filter shades . flip (.) (length . fst) . (==)
 
 betoken :: Shell String
-betoken s = filter (/= ".") (betoken' (maxr (map (length.fst) shades)) (map shell s))
+betoken = filter (/= ".") . betoken' (maximum (map (length.fst) shades)) . map shell
 
 -- inwend on length of n-graph
 betoken' :: Int -> Shift [String]
-betoken' 0 s = s
-betoken' n s = betoken' (n-1) (betoken'' n s)
+betoken' 0 = id
+betoken' n = betoken' (n-1) . betoken'' n
 
 -- leftfare through `s` on `n`
 betoken'' :: Int -> Shift [String]
@@ -104,34 +88,3 @@ betoken'' n s = lif (length s >= n)
     (betoken'' n (leave n s) ++ [concat (scoop n s)])
     (betoken'' n (init s) ++ [last s]))
   s
--- todo: if runtime becomes bad then think about reviving this implementation
-
---betoken :: String -> [String]
---betoken (first:rest) = filter ("" /=) $ lif ([first] : betoken rest)
---                     ((\(css,cs) -> css ++ betoken cs) (await (first:rest)))
---                     (full $ awaitors first)
---betoken [] = []
-
---awaitors :: Char -> [String]
---awaitors c = ly' ("awaitors of "++[c],) $ filter (flip begins [c]) (map fst shades)
---
---await :: String -> ([String], String)
---await (first:rest) = ly' ("awaiting "++(first:rest),) $
---  lif ([[first]], rest)
---      (lif ([fromMaybe (ly' (const "oh no") first:[head rest])
---                       (lookup (ly' (const ("lookup",first, head rest)) (first:[head rest])) shades)]
---             , lif [] (tail rest) (full rest))
---           ((\(x, y) -> lif (ly' ("nelem",) ([[first]], concat x ++ y))
---                            (ly' ("yelem",) ([recklessly $ lookup [first, head $ head x] shades, tail $ head x], y))
---                            (ly' ("?elem "++[first]++concat x,) $ elem (first:head x) (map fst shades))) (await rest))
---           (full (awaitors $ head rest)))
---      (ly' (const ("fullness check", rest)) $ full rest)
---await _ = ([], [])
---
----- "bb" -> await ['b', 'b'] -> awaiting… ['b'] await ['b'] -> awaiting… ['b'] ['b'] -> ['b', 'b']
----- "bh" -> await ['b', 'h'] -> awaiting… ['b'] await ['h'] -> awaiting… ['b'] ['h'] -> ['bh']
----- "bh1" -> await ['b', 'h', '1'] -> awaiting… ['b'] await ['h', '1']
-----       -> awaiting… ['b'] awaiting… ['h'] await ['1']
-----       -> awaiting… ['b'] awaiting… ['h'] ['1'] -> awaiting… ['b'] ['h1'] -> ['b', h1']
---
---

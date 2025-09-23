@@ -5,11 +5,11 @@
 module Bend where
 
 import Mind
+import Mark
 import Token
 import Loud hiding (Root)
 import Breath
 import Shift
-import Mark
 
 type Shape = Branch Bendmark
 
@@ -23,28 +23,28 @@ instance Show Kind where
       Name -> "N"
       Deed -> "D"
 
--- [+main, +mean] = unm
--- [+main, -mean] = dep
--- [-main, +mean] = dat
--- [-main, -mean] = gen
--- main > mean
-data Bendmark = Allmark | Quick | Man | Many | Main | Mean
+data Bendmark = Bow
+  | Quick | Were
+  | Many | More
+  | Main | Mean
   deriving (Eq)
 
--- todo: these some more
 instance Mark Bendmark where
   axled = const True
   isSteadfast = const True
-  below' Allmark = [Quick, Man, Many, Main, Mean]
+  below' Bow = [Quick, Were, Many, More, Main, Mean]
+  below' Quick = [Were]
+  below' Many = [More]
   below' Main = [Mean]
   below' _ = []
 
 instance Show Bendmark where
   show m = case m of
-    Allmark -> "allmark"
+    Bow -> "Bow"
     Quick -> "quick"
+    Were -> "were"
     Many -> "many"
-    Man -> "man"
+    More -> "more"
     Main -> "main"
     Mean -> "mean"
 
@@ -69,22 +69,15 @@ instance Meaningful Root where
   meaning (Root _ s) = "\"" ++ s ++ "\""
 
 instance Meaningful Stem where
-  meaning (Stem rs _ _) = case rs of
-    Left r -> meaning r
-    Right s -> meaning s
+  meaning (Stem rs _ _) = either meaning meaning rs
 
 instance Loudful Root where
   louds (Root ls _) = ls
   showLouds = ("√" ++).unstill.louds
 
 instance Loudful Stem where
-  louds (Stem rs ls _) = case rs of
-    Left r -> louds r++ls
-    Right s -> louds s++ls
-  showLouds (Stem rs ls _) = x ++ "-" ++ unstill ls where
-    x = case rs of
-      Left r -> showLouds r
-      Right s -> showLouds s
+  louds (Stem rs ls _) = either (flip (++) ls . louds) (flip (++) ls . louds) rs
+  showLouds (Stem rs ls _) = either showLouds showLouds rs ++ "-" ++ unstill ls
 
 instance Loudful Ending where
   louds (Ending ls _) = ls
@@ -95,10 +88,7 @@ instance Show Root where
 
 -- todo: beautification
 instance Show Stem where
-  show s@(Stem rs _ k) = showLouds s ++ " " ++ show k ++ " " ++ x where
-    x = case rs of
-      Left r -> meaning r
-      Right s -> meaning s
+  show s = showLouds s ++ " " ++ show (kind s) ++ " " ++ meaning s
 
 instance Show Ending where
   show e@(Ending _ sh) = showLouds e ++ " " ++ show sh
@@ -110,7 +100,7 @@ unstem :: Stem
 unstem = Stem (Left unroot) [] Unkind
 
 unshape :: Shape
-unshape = Branch Allmark True []
+unshape = Branch Bow True []
 
 unending :: Ending
 unending = Ending [] unshape
@@ -134,19 +124,22 @@ bendOne :: Ending -> Stem -> Woord
 bendOne (Ending f sh) st
   = Woord ((queue shoals.makeBright.onbear.queue deeps) (louds st++f)) (kind st) sh (meaning st)
 
--- how my heart yearns within me
 bend :: [[Ending]] -> Stem -> Board
-bend endings = bend' endings (queue deeps) (queue shoals)
+bend = flip (flip bend' (queue deeps)) (queue shoals)
 
+-- todo: this is horrific
 bend' :: [[Ending]] -> Shift Flight -> Shift Bright -> Stem -> Board
-bend' endings deeps shoals stem
-  = Board $ map (map (\e@(Ending _ sh) -> Woord ((shoals.makeBright.deeps) (louds stem ++ louds e)) (kind stem) sh (meaning stem))) endings
+bend' es ds ss stem
+  = Board (map (map (\e@(Ending _ sh) ->
+    Woord ((ss.makeBright.ds) (louds stem ++ louds e))
+          (kind stem) sh (meaning stem)
+    )) es)
 
 bendDeep :: [[Ending]] -> Stem -> Board
-bendDeep endings = bend' endings (queue deeps) id
+bendDeep = flip (flip bend' (queue deeps)) id
 
 bendShoal :: [[Ending]] -> Stem -> Board
-bendShoal endings = bend' endings id (queue shoals)
+bendShoal = flip (flip bend' id) (queue shoals)
 
 deeps :: [Shift Flight]
 deeps = [id]--[onbear, zg]
