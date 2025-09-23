@@ -49,7 +49,7 @@ worth' :: Mark a => a -> Branch a -> Bool
 worth' m' (Branch m w cs) = m==m' && w || any (worth' m') cs
 
 worths :: Mark a => [a] -> Branch a -> Bool
-worths = flip (.) (flip worth') . flip all
+worths ms l = all (flip worth' l) ms
 
 become :: Mark a => Branch a -> Shift (Branch a)
 become = const

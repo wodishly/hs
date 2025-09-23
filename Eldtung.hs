@@ -11,7 +11,7 @@ import Bend
 import Data.Function (applyWhen)
 
 rootByMean :: String -> Root
-rootByMean = only . flip filter roothoard . flip (.) meaning . (==)
+rootByMean s = only $ filter ((== s) . meaning) roothoard
 
 roothoard :: [Root]
 roothoard = map ((uncurry Root . first dirtys) . nright) allhoard

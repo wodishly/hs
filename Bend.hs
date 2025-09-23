@@ -125,7 +125,7 @@ bendOne (Ending f sh) st
   = Woord ((queue shoals.makeBright.onbear.queue deeps) (louds st++f)) (kind st) sh (meaning st)
 
 bend :: [[Ending]] -> Stem -> Board
-bend = flip (flip bend' (queue deeps)) (queue shoals)
+bend es = bend' es (queue deeps) (queue shoals)
 
 -- todo: this is horrific
 bend' :: [[Ending]] -> Shift Flight -> Shift Bright -> Stem -> Board
@@ -136,10 +136,10 @@ bend' es ds ss stem
     )) es)
 
 bendDeep :: [[Ending]] -> Stem -> Board
-bendDeep = flip (flip bend' (queue deeps)) id
+bendDeep es = bend' es (queue deeps) id
 
 bendShoal :: [[Ending]] -> Stem -> Board
-bendShoal = flip (flip bend' id) (queue shoals)
+bendShoal es = bend' es id (queue shoals)
 
 deeps :: [Shift Flight]
 deeps = [id]--[onbear, zg]

@@ -70,7 +70,7 @@ sharps = [
  ]
 
 shadesOf :: Int -> [(String, String)]
-shadesOf = flip filter shades . flip (.) (length . fst) . (==)
+shadesOf n = filter ((== n) . length . fst) shades
 
 betoken :: Shell String
 betoken = filter (/= ".") . betoken' (maximum (map (length.fst) shades)) . map shell

@@ -72,11 +72,11 @@ bothly m n ls = zipWith (\x y -> (fst x, samely (snd x) (fst y), snd y))
 
 -- deepshift to shoalshift
 float :: Shift Flight -> Shift Bright
-float = (makeBright .) . flip (.) flatten
+float f = makeBright.f.flatten
 
 -- shoalshift to deepshift
 sink :: Shift Bright -> Shift Flight
-sink = (flatten .) . flip (.) makeBright
+sink f = flatten.f.makeBright
 
 workAll :: Shift Loud -> Shift Bright
 workAll = float.map
@@ -114,7 +114,7 @@ stavefold' ls = case ls of
   stuff -> stuff
 
 lurk :: [Shift Bright] -> Shift (Shift Bright)
-lurk = (queue .) . (flip (.) shell . (++))
+lurk shs f = queue (shs++[f])
 
 -- do `f` until `br == f br`
 gainly :: Shift Bright -> Shift Bright

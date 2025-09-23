@@ -44,7 +44,7 @@ instance Mark Loudmark where
   below' _ = []
 
 unstill :: Flight -> String
-unstill = flip (lunless null) nothing . cleans
+unstill ls = lunless null (cleans ls) nothing
 
 meanBear :: Loud
 meanBear = ons [Bear, Smooth, Stave, Thru, Body, Low] (def Tung)
@@ -56,7 +56,7 @@ unloud :: Loud
 unloud = off Tung (def Tung)
 
 isGlide :: Loud -> Bool
-isGlide = flip none [Bear, Choke] . flip worth'
+isGlide x = none (flip worth' x) [Bear, Choke]
 
 isDerm :: Loud -> Bool
 isDerm = worths [Bear, Choke]
@@ -65,7 +65,7 @@ isRough :: Loud -> Bool
 isRough = not.worth' Smooth
 
 isThroat :: Loud -> Bool
-isThroat = flip all [not.worth' Root, worths [Thru, Body]] . flip ($)
+isThroat l = all ($ l) [not.worth' Root, worths [Thru, Body]]
 
 unbear :: Shift Loud
 unbear = offs [Bear, Long]

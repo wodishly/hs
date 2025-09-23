@@ -81,7 +81,7 @@ shell = (: [])
 
 -- split xs into a list of lists xss where each `last xss` gladdens `f`
 split :: (a -> Bool) -> Shell [a]
-split = flip (.) (map singleton) . split'
+split f = split' f . map singleton
 
 split' :: (a -> Bool) -> Shift [[a]]
 split' f (a:b:rest) = lif
